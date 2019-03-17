@@ -514,5 +514,29 @@ N is the current pomodoro cycle."
                cycle
                timer)))))
 
+(defun org-tomato-user-pomodoro-goto ()
+  "Open the log file and go to the last pomodoro."
+  (interactive)
+  (org-tomato--with-log-file
+   (let ((set-point (org-tomato--find-last-set)))
+     (if (not set-point)
+         (message "WARNING: No sets available. Nothing to do.")
+       (progn
+         (-> (save-excursion (goto-char set-point) (point-marker))
+             marker-buffer
+             pop-to-buffer-same-window)
+         (let ((pom-point (org-tomato--find-last-pomodoro set-point)))
+           (if (not pom-point)
+               (progn
+                 (message "WARNING: No pomodoros available. Going to last set.")
+                 (goto-char set-point))
+             (goto-char pom-point)))
+         ;; (if (or (< m (point-min)) (> m (point-max))) (widen))
+         (org-show-entry)
+         (org-back-to-heading t)
+         (org-cycle-hide-drawers 'children)
+         (recenter org-clock-goto-before-context)
+         (org-reveal))))))
+
 (provide 'org-tomato)
 ;;; org-tomato.el ends here
