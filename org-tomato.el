@@ -48,6 +48,13 @@
 (defvar org-tomato-long-break-length 1200
   "Time of a long break in seconds.")
 
+(defvar org-tomato-log-rotate-interval 30
+  "The time spanned in days before log files are rotated.")
+
+(defvar org-tomato-timer-sound nil
+  "The file to play when any timer reaches zero. Must be a WAV file.
+Set to nil to disable timer sounds.")
+
 (defvar org-tomato-cycles 4)
 
 ;; TODO, this is not a good way to list files...
@@ -57,7 +64,8 @@
 ;;; internal variables
 (defvar org-tomato--timer nil)
 
-;;; macros
+;;; misc macros
+
 (defmacro org-tomato--with-advice (adlist &rest body)
   "Execute BODY with temporary advice in ADLIST.
 
@@ -71,6 +79,45 @@ event of an error or nonlocal exit."
      ,@(--map (cons #'advice-add it) adlist)
      (unwind-protect (progn ,@body)
        ,@(--map `(advice-remove ,(car it) ,(nth 2 it)) adlist))))
+
+;;; log file low-level operations
+
+(defun org-tomato--log-insert-header ()
+  "Insert the heading into the log file."
+  (insert
+   (string-join
+    (list "#    -*- mode: org -*-\n"
+          "\n"
+          "# do not modify unless you know what you are doing\n"
+          "\n"
+          (format "# Created: %s\n" (format-time-string "%Y-%m-%d"))
+          "\n"))))
+
+;; TODO, what happens when this fires in the middle of a pomodoro?
+(defun org-tomato--log-rotate ()
+  "Rotate the log file."
+  (save-excursion
+    (goto-char (point-min))
+    (let* ((created-time
+            (save-match-data
+              (re-search-forward
+               "# Created: \\([[:digit:]]\\{4\\}-[[:digit:]]\\{2\\}-[[:digit:]]\\{2\\}\\)$"
+               nil t)
+              (match-string 1)))
+           (diff (->> created-time
+                      parse-time-string
+                      (-replace nil 0)
+                      (apply #'encode-time)
+                      float-time
+                      round
+                      (- (round (float-time))))))
+      (when (> diff (* 24 60 60 org-tomato-log-rotate-interval))
+        (let* ((ext (file-name-extension org-tomato-log-file))
+               (base (file-name-sans-extension org-tomato-log-file))
+               (new (format "%s_%s.%s" base created-time ext)))
+          (copy-file org-tomato-log-file new t)
+          (erase-buffer)
+          (org-tomato--log-insert-header))))))
 
 (defmacro org-tomato--goto (point &rest body)
   "If POINT is non-null, go to POINT and execute BODY.
@@ -87,13 +134,14 @@ Otherwise do nothing."
 Make log file if it does not exist and save when BODY has finished
 execution."
   `(org-tomato--with-log-file
-    (unless (file-exists-p org-tomato-log-file)
-      (insert
-       (string-join
-        (list "#    -*- mode: org -*-\n"
-              "\n"
-              "# do not modify unless you know what you are doing\n"
-              "\n"))))
+    (if (not (file-exists-p org-tomato-log-file))
+        (insert
+         (string-join
+          (list "#    -*- mode: org -*-\n"
+                "\n"
+                "# do not modify unless you know what you are doing\n"
+                "\n")))
+      (org-tomato--log-rotate))
     ,@body
     (let ((inhibit-message t)) (save-buffer))))
 
