@@ -102,6 +102,9 @@ Otherwise do nothing."
 (advice-add #'org-resolve-clocks :around #'org-tomato--resolve-clocks-ad)
 
 ;;; state machine
+;; Can't be ruled
+;; Won't be fooled,
+;; By the tomato state machine
 
 (cl-defstruct (org-tomato--state
                (:constructor org-tomato--state-create)
