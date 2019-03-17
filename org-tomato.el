@@ -48,7 +48,8 @@
   :group 'org)
 
 (defcustom org-tomato-log-file "~/Org/pomodoro.org_archive"
-  "The file in which org pomodoros are logged."
+  "The file in which org pomodoros are logged.
+If logging is not desired, set this to an in-memory file path."
   :type 'file
   :group 'org-tomato)
 
@@ -153,13 +154,14 @@ ORIG-SUB is the subroutine to be advised and ARGS are its arguments."
                       float-time
                       round
                       (- (round (float-time))))))
-      ;; TODO, check that the file is actually filled with something
-      ;; if not might as well just change the date
       (when (> diff (* 24 60 60 org-tomato-log-rotate-interval))
-        (let* ((ext (file-name-extension org-tomato-log-file))
-               (base (file-name-sans-extension org-tomato-log-file))
-               (new (format "%s_%s.%s" base created-time ext)))
-          (copy-file org-tomato-log-file new t)
+        ;; if there are no sets in the log file, just erase everything
+        ;; and insert the new date
+        (when (org-tomato--log-find-last-set)
+          (let* ((ext (file-name-extension org-tomato-log-file))
+                 (base (file-name-sans-extension org-tomato-log-file))
+                 (new (format "%s_%s.%s" base created-time ext)))
+            (copy-file org-tomato-log-file new t))
           (erase-buffer)
           (org-tomato--log-insert-header))))))
 
