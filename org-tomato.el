@@ -57,10 +57,6 @@ Set to nil to disable timer sounds.")
 
 (defvar org-tomato-cycles 4)
 
-;; TODO, this is not a good way to list files...
-(defvar org-tomato-files-ignore
-  `(,(expand-file-name org-tomato-log-file)))
-
 ;;; internal variables
 
 (defvar org-tomato--timer nil
@@ -93,7 +89,11 @@ event of an error or nonlocal exit."
 ORIG-SUB is the subroutine to be advised and ARGS are its arguments."
   (org-tomato--with-advice
       ((#'org-files-list
-        :around (lambda (f) (-difference (funcall f) org-tomato-files-ignore))))
+        :around
+        (lambda (f)
+          (-remove-item
+           (expand-file-name org-tomato-log-file)
+           (funcall f)))))
     (unwind-protect (apply orig-sub args))))
 
 (advice-add #'org-resolve-clocks :around #'org-tomato--resolve-clocks-ad)
