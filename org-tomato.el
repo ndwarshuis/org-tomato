@@ -30,10 +30,12 @@
 (require 'cl-lib)
 (require 'subr-x)
 (require 'dash)
+(require 'sound-wav)
 (require 'org)
 (require 'org-clock)
 
 ;;; custom variables
+
 (defvar org-tomato-log-file "~/Org/pomodoro.org_archive"
   "The file in which org pomodoros are stored.")
 
@@ -243,7 +245,10 @@ Use `org-tomato-long-break-length' when LONG, otherwise use
 
 (defun org-tomato--notify (message)
   "Notify the user with MESSAGE."
-  (org-notify message))
+  (org-notify message)
+  (if (file-exists-p org-tomato-timer-sound)
+      (sound-wav-play org-tomato-timer-sound)
+    (message "WARNING: %s not found." org-tomato-timer-sound)))
 
 (defun org-tomato--read-past-seconds (past-clock)
   "Prompt user for elapsed minutes to complete open clocks.
