@@ -515,7 +515,7 @@ N is the current pomodoro cycle."
                (if (not open-clock) (message "WARNING: No open clocks.")
                  (org-tomato--finish-clock pom-point))))))))))
 
-;; interactive signaling functions
+;; interactive functions
 
 (defun org-tomato-user-clock-in ()
   "Send a clock-in signal to the org-tomato state machine."
@@ -537,6 +537,18 @@ N is the current pomodoro cycle."
   (setq org-tomato--state
         (org-tomato--next-state
          :kill org-tomato--state)))
+
+(defun org-tomato-user-hl-clock-in ()
+  "Clock into an Org headline and pomodoro simultaneously."
+  (interactive)
+  (org-clock-in)
+  (org-tomato-user-clock-in))
+
+(defun org-tomato-user-hl-clock-out ()
+  "Clock out of an Org headline and pomodoro simultaneously."
+  (interactive)
+  (org-clock-out)
+  (org-tomato-user-clock-out))
 
 (defun org-tomato-user-get-summary ()
   "Display a summary of the current state, including timer and cycle."
