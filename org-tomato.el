@@ -76,18 +76,24 @@ Otherwise do nothing."
   `(when ,point (save-excursion (goto-char point) ,@body)))
 
 (defmacro org-tomato--with-log-file (&rest body)
-  "Open log file and execute BODY."
+  "Open log file and execute BODY and return last result from BODY."
   `(let ((buffer (find-file-noselect org-tomato-log-file)))
-    (with-current-buffer buffer
-      (unless (file-exists-p org-tomato-log-file)
-        (insert
-         (string-join
-          "#    -*- mode: org -*-\n"
-          "\n"
-          "# do not modify unless you know what you are doing\n"
-          "\n")))
-      ,@body
-      (let ((inhibit-message t)) (save-buffer)))))
+     (with-current-buffer buffer ,@body)))
+
+(defmacro org-tomato--with-log-file-save (&rest body)
+  "Open log file and execute BODY.
+Make log file if it does not exist and save when BODY has finished
+execution."
+  `(org-tomato--with-log-file
+    (unless (file-exists-p org-tomato-log-file)
+      (insert
+       (string-join
+        (list "#    -*- mode: org -*-\n"
+              "\n"
+              "# do not modify unless you know what you are doing\n"
+              "\n"))))
+    ,@body
+    (let ((inhibit-message t)) (save-buffer))))
 
 ;;; advising hacks
 
@@ -374,7 +380,7 @@ N is the current pomodoro cycle."
 (defun org-tomato--clock-in ()
   "Clock into a pomodoro given old and new states O and N."
   (org-tomato--cancel-timer)
-  (org-tomato--with-log-file
+  (org-tomato--with-log-file-save
    (let ((set-point (org-tomato--find-last-set)))
      ;; insert new set if there are no sets or no open sets
      (when (or (not set-point) (org-tomato--set-closed-p set-point))
@@ -427,7 +433,7 @@ N is the current pomodoro cycle."
 (defun org-tomato--clock-out ()
   "Clock out a pomodoro and close the set if complete."
   (org-tomato--cancel-timer)
-  (org-tomato--with-log-file
+  (org-tomato--with-log-file-save
    (let ((set-point (org-tomato--find-last-set)))
      (if (not set-point) (message "WARNING: No open sets.")
        (let ((pom-point (org-tomato--find-last-pomodoro set-point)))
@@ -445,7 +451,7 @@ N is the current pomodoro cycle."
 (defun org-tomato--kill ()
   "Close clocks and timers and close current set."
   (org-tomato--cancel-timer)
-  (org-tomato--with-log-file
+  (org-tomato--with-log-file-save
    (let ((set-point (org-tomato--find-last-set)))
      (if (not set-point) (message "WARNING: No open sets.")
        (progn
@@ -483,9 +489,10 @@ N is the current pomodoro cycle."
   "Display a summary of the current state, including timer and cycle."
   (interactive)
   (let* ((state (org-tomato--state-name org-tomato--state))
-         (cycle (-some-> (org-tomato--find-last-set)
-                         org-tomato--find-last-pomodoro
-                         org-tomato--get-pomodoro-cycle))
+         (cycle (org-tomato--with-log-file
+                 (-some-> (org-tomato--find-last-set)
+                          org-tomato--find-last-pomodoro
+                          org-tomato--get-pomodoro-cycle)))
          (format-time
           (lambda (time)
             (let ((min (abs (/ time 60)))
