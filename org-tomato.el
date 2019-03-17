@@ -3,9 +3,9 @@
 ;; Copyright (C) 2019  Nathan Dwarshuis
 
 ;; Author: Nathan Dwarshuis <natedwarshuis@gmail.com>
-;; Keywords: org-mode, data
+;; Keywords: org-mode
 ;; Homepage: https://github.com/ndwarshuis/org-tomato
-;; Package-Requires: ((emacs "25") (dash "2.15"))
+;; Package-Requires: ((emacs "25") (dash "2.15") (sound-wav "0.02"))
 ;; Version: 0.0.1
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -36,26 +36,47 @@
 
 ;;; custom variables
 
-(defvar org-tomato-log-file "~/Org/pomodoro.org_archive"
-  "The file in which org pomodoros are stored.")
+(defgroup org-tomato nil
+  "Org Tomato Options."
+  :tag "Org-Tomato"
+  :group 'org)
 
-(defvar org-tomato-pomodoro-length 1500
-  "Time of a pomodoro in seconds.")
+(defcustom org-tomato-log-file "~/Org/pomodoro.org_archive"
+  "The file in which org pomodoros are logged."
+  :type 'file
+  :group 'org-tomato)
 
-(defvar org-tomato-break-length 300
-  "Time of a short break in seconds.")
+(defcustom org-tomato-pomodoro-length 1500
+  "Time length of a pomodoro in seconds."
+  :type 'file
+  :group 'org-tomato)
 
-(defvar org-tomato-long-break-length 1200
-  "Time of a long break in seconds.")
+(defcustom org-tomato-break-length 300
+  "Time length of a short break in seconds."
+  :type 'integer
+  :group 'org-tomato)
 
-(defvar org-tomato-log-rotate-interval 30
-  "The time spanned in days before log files are rotated.")
+(defcustom org-tomato-long-break-length 1200
+  "Time length of a long break in seconds."
+  :type 'integer
+  :group 'org-tomato)
 
-(defvar org-tomato-timer-sound nil
+(defcustom org-tomato-log-rotate-interval 30
+  "The time spanned in days before log files are rotated."
+  :type 'integer
+  :group 'org-tomato)
+
+(defcustom org-tomato-timer-sound nil
   "The file to play when any timer reaches zero. Must be a WAV file.
-Set to nil to disable timer sounds.")
+Set to nil to disable timer sounds."
+  :type 'file
+  :group 'org-tomato)
 
-(defvar org-tomato-cycles 4)
+(defcustom org-tomato-cycles 4
+  "The number of pomodoros that complete a full set.
+The original technique has this as 4 (the default)."
+  :type 'integer
+  :group 'org-tomato)
 
 ;;; internal variables
 
