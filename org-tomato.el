@@ -23,7 +23,13 @@
 
 ;;; Commentary:
 
-;; complexifier is a real word
+;; This is a simple implementation of the pomodoro technique for org
+;; mode. It uses a simple state machine to keep track of pomodoros and
+;; breaks and also writes pomodoros into a log file to track progress.
+
+;; It also has convenient functions to clock in/out of pomodoros as
+;; well as timers and notifications to alert the user when pomodoros
+;; and breaks are finished.
 
 ;;; Code:
 
@@ -263,7 +269,6 @@ Return an integer in seconds or nil if no clocks are found."
      (-->
       (org-element--parse-elements s e 'first-section nil nil nil nil)
       (car it)
-      ;; (org-tomato--element-parse-headline)
       (org-element-map it 'clock (lambda (c) (org-element-property :duration c)))
       (--map (funcall time-convert it) it)
       (cl-reduce '+ it)))))
