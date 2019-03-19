@@ -351,16 +351,20 @@ set the final clock time instead of the current time."
    (point-max)
    (search-backward-regexp "\\* \\(TODO\\|DONE\\) set" nil t)))
 
-(defun org-tomato--log-insert-pomodoro (point n)
-  "Insert a new pomodoro headline at POINT in `org-tomato-log-file'.
+(defun org-tomato--log-insert-pomodoro (n)
+  "Insert a new pomodoro headline at the end of `org-tomato-log-file'.
 N is the current pomodoro cycle."
   (org-tomato--log-goto-save
-   point
+   (point-max)
+   (unless (= 10 (char-before)) (end-of-line) (insert "\n"))
    (insert (format "** pomodoro %s\n" n))))
 
-(defun org-tomato--log-insert-set (point)
-  "Insert a new set headline at POINT in `org-tomato-log-file'."
-  (org-tomato--log-goto-save point (insert "* TODO set\n")))
+(defun org-tomato--log-insert-set ()
+  "Insert a new set headline at the end of `org-tomato-log-file'."
+  (org-tomato--log-goto-save
+   (point-max)
+   (unless (= 10 (char-before)) (end-of-line) (insert "\n"))
+   (insert "* TODO set\n")))
 
 (defun org-tomato--log-close-set (point)
   "Close the headline under POINT in `org-tomato-log-file'."
@@ -382,13 +386,13 @@ N is the current pomodoro cycle."
   (let ((set-point (org-tomato--log-find-last-set)))
     ;; insert new set if there are no sets or no open sets
     (when (or (not set-point) (org-tomato--log-set-is-closed-p set-point))
-      (org-tomato--log-insert-set (point-max))
+      (org-tomato--log-insert-set)
       (setq set-point (org-tomato--log-find-last-set)))
 
     ;; insert pomodoro at cycle 1 if there are no pomodoros in set
     (let ((pom-point (org-tomato--log-find-last-pomodoro set-point)))
       (if (not pom-point)
-          (org-tomato--log-insert-pomodoro (point-max) 1)
+          (org-tomato--log-insert-pomodoro 1)
 
         ;; else insert pomodoros/sets based on what is in current set
         (let ((cycle (org-tomato--log-get-pomodoro-cycle pom-point))
@@ -404,7 +408,7 @@ N is the current pomodoro cycle."
           (cond
            ;; insert next pomodoro if no open clocks and set not full
            ((and (not open-clock) (< cycle org-tomato-cycles))
-            (org-tomato--log-insert-pomodoro (point-max) (+ 1 cycle)))
+            (org-tomato--log-insert-pomodoro (+ 1 cycle)))
 
            ;; possibly insert next pomodoro if clock is open, set
            ;; is not full, and we want to use the old set. Do nothing
@@ -413,16 +417,18 @@ N is the current pomodoro cycle."
                  (< cycle org-tomato-cycles)
                  (y-or-n-p "Open set detected. Use old set? "))
             (unless (y-or-n-p "Continue with last pomodoro? ")
-              (org-tomato--log-insert-pomodoro (point-max) (+ 1 cycle))))
+              (org-tomato--log-insert-pomodoro (+ 1 cycle))))
 
            ;; all other cases, close last set and insert new set
            (t
             (org-tomato--log-close-set set-point)
-            (org-tomato--log-insert-set (point-max))
-            (org-tomato--log-insert-pomodoro (point-max) 1))))))
+            (org-tomato--log-insert-set)
+            (org-tomato--log-insert-pomodoro 1))))))
 
     ;; after placing all sets/pomodoros, start clock and timer
-    (org-tomato--log-start-clock (point-max))
+    (-> (org-tomato--log-find-last-set)
+        org-tomato--log-find-last-pomodoro
+        org-tomato--log-start-clock)
     (-> (org-tomato--log-find-last-set)
         org-tomato--log-find-last-pomodoro
         org-tomato--log-sum-pomodoro-clock
