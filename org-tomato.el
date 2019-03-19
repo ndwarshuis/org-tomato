@@ -39,6 +39,7 @@
 (require 'sound-wav)
 (require 'org)
 (require 'org-clock)
+(require 'org-agenda)
 
 ;;; custom variables
 
@@ -570,6 +571,18 @@ arguments when the transition is triggered."
   "Clock out of an Org headline and pomodoro simultaneously."
   (interactive)
   (org-clock-out)
+  (org-tomato-user-clock-out))
+
+(defun org-tomato-user-hl-agenda-clock-in ()
+  "Clock into an Org headline and pomodoro simultaneously."
+  (interactive)
+  (org-agenda-clock-in)
+  (org-tomato-user-clock-in))
+
+(defun org-tomato-user-hl-agenda-clock-out ()
+  "Clock out of an Org headline and pomodoro simultaneously."
+  (interactive)
+  (org-agenda-clock-out)
   (org-tomato-user-clock-out))
 
 (defun org-tomato-user-get-summary ()
