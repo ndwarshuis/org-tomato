@@ -16,3 +16,11 @@ One might wonder why this package exists when there is already the =org-pomodoro
 
 If you are deciding between packages, the decision is pretty simple (in my view at least). If you want something simple that doesn't pollute your file system with log files, use =org-pomodoro=. Otherwise, use this.
 
+* Roadmap
+- [ ] Clean up code
+  - [ ] Add customizable options for pomodoro reentry
+  - [ ] Fix log rotation
+  - [ ] Fix clock in errors
+- [ ] Add functionality
+  - [ ] Create timer adjuster
+  - [ ] Add logging template
