@@ -1,0 +1,11 @@
+In implmentation of the pomodoro technique in Emacs Org-Mode.
+
+This package is not on MELPA currently. I am planning on uploading it once I iron out the bugs and sufficiently de-personalize it. If you wish to install it, please clone this repo and add to your load path.
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list load-path "path/to/repo")
+(require org-tomato)
+#+END_SRC
+
+* Motivation
+- why does this exist when there is already org-pomodoro?
