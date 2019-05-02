@@ -2,10 +2,17 @@ In implmentation of the pomodoro technique in Emacs Org-Mode.
 
 This package is not on MELPA currently. I am planning on uploading it once I iron out the bugs and sufficiently de-personalize it. If you wish to install it, please clone this repo and add to your load path.
 
+#+BEGIN_SRC sh
+git clone git@github.com:ndwarshuis/org-tomato.git
+#+END_SRC
+
 #+BEGIN_SRC emacs-lisp
 (add-to-list load-path "path/to/repo")
 (require org-tomato)
 #+END_SRC
 
 * Motivation
-- why does this exist when there is already org-pomodoro?
+One might wonder why this package exists when there is already the =org-pomodoro= package in MELPA. The reason is because I wanted a pomodoro implementation that logged and tracked my progress in addition to the timer sequence. For me this adds some extra motivation because I know I am tracking myself, and also allows review of how well I am sticking to the technique at a later date.
+
+If you are deciding between packages, the decision is pretty simple (in my view at least). If you want something simple that doesn't pollute your file system with log files, use =org-pomodoro=. Otherwise, use this.
+
