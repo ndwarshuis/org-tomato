@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019  Nathan Dwarshuis
 
 ;; Author: Nathan Dwarshuis <natedwarshuis@gmail.com>
-;; Keywords: org-mode
+;; Keywords: org-mode, outlines
 ;; Homepage: https://github.com/ndwarshuis/org-tomato
 ;; Package-Requires: ((emacs "25") (dash "2.15") (sound-wav "0.02"))
 ;; Version: 0.0.1
